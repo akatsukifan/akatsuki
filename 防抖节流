@@ -1,0 +1,56 @@
+1. 安装 Lodash
+bash
+
+npm install lodash
+npm install --save-dev @types/lodash  # 如果使用TypeScript
+
+2. 在 Vue 组件中使用
+防抖 (Debounce)
+
+防抖的作用是：事件触发后，等待一段时间再执行函数。如果在这段时间内事件再次被触发，则重新计时。它适合用于搜索框输入提示、窗口 resize 结束后的操作等场景，避免频繁执行昂贵计算或请求。
+vue
+
+<script setup lang="ts">
+import { debounce } from 'lodash';
+import { onUnmounted } from 'vue';
+
+// 使用防抖函数包装你的业务逻辑
+const handleSearch = debounce((searchTerm: string) => {
+  console.log('正在搜索:', searchTerm);
+  // 这里可以是你的API调用或其他逻辑
+}, 500); // 500毫秒延迟
+
+// 重要：在组件卸载时取消防抖函数 pending 的执行
+onUnmounted(() => {
+  handleSearch.cancel();
+});
+</script>
+
+<template>
+  <input type="text" @input="(e) => handleSearch((e.target as HTMLInputElement).value)" />
+</template>
+
+节流 (Throttle)
+
+节流的作用是：在一段时间内，函数最多只执行一次。它适合用于页面滚动加载、按钮频繁点击等场景，确保以固定的频率执行。
+vue
+
+<script setup lang="ts">
+import { throttle } from 'lodash';
+import { onUnmounted } from 'vue';
+
+// 使用节流函数包装你的业务逻辑
+const handleClick = throttle(() => {
+  console.log('按钮被点击了（节流处理）');
+  // 这里可以是你的点击处理逻辑
+}, 1000); // 在1000毫秒内最多执行一次
+
+// 重要：在组件卸载时取消节流函数 pending 的执行
+onUnmounted(() => {
+  handleClick.cancel();
+});
+</script>
+
+<template>
+  <button @click="handleClick">点击我（节流）</button>
+</template>
