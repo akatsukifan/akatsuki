@@ -41,6 +41,36 @@ def parse_args() -> argparse.Namespace:
             "and 'balanced' offers a middle ground."
         ),
     )
+    parser.add_argument(
+        "--video-codec",
+        default="libx264",
+        help="Video codec to use for the encoded output (default: libx264).",
+    )
+    parser.add_argument(
+        "--crf",
+        type=int,
+        default=18,
+        help=(
+            "CRF quality level for the video encoder; lower is higher quality. "
+            "Common range is 18-28 (default: 18)."
+        ),
+    )
+    parser.add_argument(
+        "--encode-preset",
+        choices=[
+            "ultrafast",
+            "superfast",
+            "veryfast",
+            "faster",
+            "fast",
+            "medium",
+            "slow",
+            "slower",
+            "veryslow",
+        ],
+        default="medium",
+        help="Encoder speed/efficiency trade-off passed to the video codec (default: medium).",
+    )
     return parser.parse_args()
 
 
@@ -72,10 +102,20 @@ def determine_output_path(input_path: Path, fps: float, explicit_output: Path | 
     return input_path.with_name(f"{stem}_{int(fps)}fps{suffix}")
 
 
-def interpolate_video(input_path: Path, output_path: Path, fps: float, preset: str) -> None:
+def interpolate_video(
+    input_path: Path,
+    output_path: Path,
+    fps: float,
+    preset: str,
+    video_codec: str,
+    crf: int,
+    encode_preset: str,
+) -> None:
     """Run ffmpeg with the configured minterpolate filter to create the output video."""
     if not input_path.exists():
         raise SystemExit(f"Input file not found: {input_path}")
+    if input_path.resolve() == output_path.resolve():
+        raise SystemExit("Output path must be different from the input path.")
 
     filter_chain = build_filter(fps, preset)
     command = [
@@ -85,6 +125,12 @@ def interpolate_video(input_path: Path, output_path: Path, fps: float, preset: s
         str(input_path),
         "-vf",
         filter_chain,
+        "-c:v",
+        video_codec,
+        "-preset",
+        encode_preset,
+        "-crf",
+        str(crf),
         "-c:a",
         "copy",
         str(output_path),
@@ -99,8 +145,18 @@ def main() -> None:
     ensure_ffmpeg_available()
     if args.fps <= 0:
         raise SystemExit("--fps must be a positive number.")
+    if args.crf < 0:
+        raise SystemExit("--crf must be zero or a positive integer.")
     output_path = determine_output_path(args.input, args.fps, args.output)
-    interpolate_video(args.input, output_path, args.fps, args.preset)
+    interpolate_video(
+        args.input,
+        output_path,
+        args.fps,
+        args.preset,
+        args.video_codec,
+        args.crf,
+        args.encode_preset,
+    )
 
 
 if __name__ == "__main__":

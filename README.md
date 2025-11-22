@@ -52,6 +52,12 @@ python scripts/interpolate.py input.mp4 --fps 60
   - `fast`: quicker, lighter motion compensation.
   - `balanced`: smooth output with bidirectional motion search (default).
   - `quality`: highest fidelity using the more expensive `vsbmc` refinement.
+- `--video-codec` selects the encoder (default: `libx264`).
+- `--crf` controls encoded quality (lower is higher quality; common range is 18–28).
+- `--encode-preset` sets the encoder speed/efficiency trade-off for the chosen codec.
+
+The output path must be different from the input path; the default suffix avoids in-place
+overwrite.
 
 Ensure `ffmpeg` is available on your system before running the script.
 
