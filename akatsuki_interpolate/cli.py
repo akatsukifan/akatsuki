@@ -52,14 +52,14 @@ def ensure_ffmpeg_available() -> None:
 
 def build_filter(fps: float, preset: str) -> str:
     """Construct the minterpolate filter chain for the chosen preset."""
-    common = [f"fps={fps}", "mi_mode=mci"]
-    if preset == "fast":
-        common.extend(["mc_mode=aobmc", "me_mode=bidir"])
-    elif preset == "quality":
-        common.extend(["mc_mode=aobmc", "me_mode=bidir", "vsbmc=1"])
-    else:
-        common.extend(["mc_mode=aobmc", "me_mode=bidir", "vsbmc=1"])
-    return "minterpolate=" + ":".join(common)
+    base = [f"fps={fps}", "mi_mode=mci"]
+    tuning = {
+        "fast": ["mc_mode=aobmc"],
+        # Balanced favors smoothness without the more expensive vsbmc pass.
+        "balanced": ["mc_mode=aobmc", "me_mode=bidir"],
+        "quality": ["mc_mode=aobmc", "me_mode=bidir", "vsbmc=1"],
+    }
+    return "minterpolate=" + ":".join(base + tuning[preset])
 
 
 def determine_output_path(input_path: Path, fps: float, explicit_output: Path | None) -> Path:
@@ -97,6 +97,8 @@ def interpolate_video(input_path: Path, output_path: Path, fps: float, preset: s
 def main() -> None:
     args = parse_args()
     ensure_ffmpeg_available()
+    if args.fps <= 0:
+        raise SystemExit("--fps must be a positive number.")
     output_path = determine_output_path(args.input, args.fps, args.output)
     interpolate_video(args.input, output_path, args.fps, args.preset)
 

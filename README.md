@@ -46,9 +46,12 @@ python scripts/interpolate.py input.mp4 --fps 60
 
 ### Options
 
-- `--fps` sets the target frame rate (default: 60).
+- `--fps` sets the target frame rate (default: 60). Must be a positive number.
 - `--output` lets you choose a destination file; otherwise a `_<fps>fps` suffix is used next to the input.
-- `--preset` can be `fast`, `balanced`, or `quality` depending on your speed/quality needs.
+- `--preset` selects the interpolation tuning:
+  - `fast`: quicker, lighter motion compensation.
+  - `balanced`: smooth output with bidirectional motion search (default).
+  - `quality`: highest fidelity using the more expensive `vsbmc` refinement.
 
 Ensure `ffmpeg` is available on your system before running the script.
 
