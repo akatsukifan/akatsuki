@@ -18,6 +18,16 @@ Python 3.9+ and a system `ffmpeg` binary).
 
 ## Usage
 
+### Quickstart (from the project root)
+
+```bash
+# view all options
+python -m akatsuki_interpolate.cli --help
+
+# interpolate a video to 60 fps in-place next to the source file
+python -m akatsuki_interpolate.cli input.mp4 --fps 60
+```
+
 ### CLI command
 
 ```bash
